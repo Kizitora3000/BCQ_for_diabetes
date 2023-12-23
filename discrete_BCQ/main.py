@@ -7,6 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 import torch
+import json
 
 import discrete_BCQ
 import DQN
@@ -219,10 +220,21 @@ def train_BCQ_of_diabetes(replay_buffer, args):
 	# 24 より大きくするとnanになる
 	parameters["eval_freq"] = 24
 
-	for i in range(int(parameters["eval_freq"])):
-		print(i)
+	for _ in range(int(parameters["eval_freq"])):
 		policy.train(replay_buffer)
-		print(policy.get_q_value(100, 10))
+	
+	state_num = 503
+	action_num = 63
+	Q_table = np.zeros((state_num, action_num))
+	for state in range(state_num):
+		for action in range(action_num):
+			Q_table[state][action] = policy.get_q_value(state, action)
+
+	list_Q_table = Q_table.tolist()
+	json_Q_table = json.dumps(list_Q_table)
+
+	with open("./bcq_data.json", 'w') as file:
+		file.write(json_Q_table)
 
 
 # Runs policy for X episodes and returns average reward
