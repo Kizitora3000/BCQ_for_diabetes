@@ -190,6 +190,10 @@ def train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args
 		print(f"Training iterations: {training_iters}")
 
 
+def train_BCQ_of_diabetes(replay_buffer, args):
+	buffer_name = f"{args.buffer_name}"
+
+
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
 def eval_policy(policy, env_name, seed, eval_episodes=10):
@@ -285,6 +289,7 @@ if __name__ == "__main__":
 	parser.add_argument("--train_behavioral", action="store_true") # If true, train behavioral policy
 	parser.add_argument("--generate_buffer", action="store_true")  # If true, generate buffer
 	parser.add_argument("--generate_buffer_of_diabetes", action="store_true")  # If true, generate buffer of diabetes dataset
+	parser.add_argument("--train_BCQ_of_diabetes")  # If true, train BCQ of diabetes dataset
 	args = parser.parse_args()
 	
 	print("---------------------------------------")	
@@ -333,5 +338,7 @@ if __name__ == "__main__":
 		state_dim = 1
 		replay_buffer = utils.DiabetesBuffer(state_dim, parameters["batch_size"], parameters["buffer_size"], device)
 		extract_from_diabetes_dataset(replay_buffer, args)
+	elif args.train_BCQ_of_diabetes:
+		train_BCQ_of_diabetes(replay_buffer, args)
 	else:
 		train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
