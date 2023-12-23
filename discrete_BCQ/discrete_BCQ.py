@@ -16,6 +16,7 @@ class Conv_Q(nn.Module):
 		self.q1 = nn.Linear(3136, 512)
 		self.q2 = nn.Linear(512, num_actions)
 
+		# generative model(生成モデル) → self.i?
 		self.i1 = nn.Linear(3136, 512)
 		self.i2 = nn.Linear(512, num_actions)
 
@@ -131,6 +132,7 @@ class discrete_BCQ(object):
 			imt = (imt/imt.max(1, keepdim=True)[0] > self.threshold).float()
 
 			# Use large negative number to mask actions from argmax
+			# perturbation model (摂動モデル)
 			next_action = (imt * q + (1 - imt) * -1e8).argmax(1, keepdim=True)
 
 			q, imt, i = self.Q_target(next_state)
@@ -164,3 +166,12 @@ class discrete_BCQ(object):
 	def copy_target_update(self):
 		if self.iterations % self.target_update_frequency == 0:
 			 self.Q_target.load_state_dict(self.Q.state_dict())
+
+
+	def get_q_value(self, state, action):
+		state = torch.tensor([[state]], dtype=torch.float32)
+		action = torch.tensor([[action]], dtype=torch.int64)
+		current_Q, imt, i = self.Q(state)
+		current_Q = current_Q.gather(1, action)
+
+		return current_Q
