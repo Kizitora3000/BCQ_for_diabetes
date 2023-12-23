@@ -191,7 +191,34 @@ def train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args
 
 
 def train_BCQ_of_diabetes(replay_buffer, args):
+	num_actions=64
 	buffer_name = f"{args.buffer_name}"
+
+	# Initialize and load policy
+	policy = discrete_BCQ.discrete_BCQ(
+		is_atari,
+		num_actions,
+		state_dim,
+		device,
+		args.BCQ_threshold,
+		parameters["discount"],
+		parameters["optimizer"],
+		parameters["optimizer_parameters"],
+		parameters["polyak_target_update"],
+		parameters["target_update_freq"],
+		parameters["tau"],
+		parameters["initial_eps"],
+		parameters["end_eps"],
+		parameters["eps_decay_period"],
+		parameters["eval_eps"]
+	)
+
+	# Load replay buffer	
+	replay_buffer.load(f"./buffers/{buffer_name}")
+
+	for i in range(int(parameters["eval_freq"])):
+		print(i)
+		policy.train(replay_buffer)
 
 
 # Runs policy for X episodes and returns average reward
@@ -235,8 +262,8 @@ if __name__ == "__main__":
 		"end_eps": 1e-2,
 		"eps_decay_period": 25e4,
 		# Evaluation
-		# "eval_freq": 5e4,
-		"eval_freq": 1,
+		"eval_freq": 5e4,
+		# "eval_freq": 1,
 		"eval_eps": 1e-3,
 		# Learning
 		"discount": 0.99,
@@ -332,6 +359,7 @@ if __name__ == "__main__":
 	replay_buffer = utils.ReplayBuffer(state_dim, is_atari, atari_preprocessing, parameters["batch_size"], parameters["buffer_size"], device)
 
 	if args.generate_buffer_of_diabetes or args.train_BCQ_of_diabetes:
+		is_atari = False
 		args.buffer_name = "buffer_of_diabetes_dataset"
 		state_dim = 1
 		replay_buffer = utils.DiabetesBuffer(state_dim, parameters["batch_size"], parameters["buffer_size"], device)
