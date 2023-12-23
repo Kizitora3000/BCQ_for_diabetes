@@ -13,8 +13,8 @@ import DQN
 import utils
 
 
-def extract_from_diabetes_dataset(replay_buffer):
-	buffer_name = "buffer_of_diabetes_dataset"
+def extract_from_diabetes_dataset(replay_buffer, args):
+	buffer_name = f"{args.buffer_name}"
 
 	directory_path = 'dataset/preprocessed_diabetes_SRL_dataset'
 	csv_files = [f for f in os.listdir(directory_path) if f.endswith('.csv')]
@@ -329,8 +329,9 @@ if __name__ == "__main__":
 	if args.train_behavioral or args.generate_buffer:
 		interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
 	elif args.generate_buffer_of_diabetes:
+		args.buffer_name = "buffer_of_diabetes_dataset"
 		state_dim = 1
 		replay_buffer = utils.DiabetesBuffer(state_dim, parameters["batch_size"], parameters["buffer_size"], device)
-		extract_from_diabetes_dataset(replay_buffer)
+		extract_from_diabetes_dataset(replay_buffer, args)
 	else:
 		train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
