@@ -11,10 +11,16 @@ To begin a behavioral policy (DQN) needs to be trained by running:
 ```
 python main.py --train_behavioral
 ```
+
+train_behavioralは行動方策（behavioral policy）の訓練を行う．これはデータセットを収集する際に使う方策であり，訓練後は学習した方策を保存する
+
 This will save the PyTorch model. A new buffer can then be collected by running:
 ```
 python main.py --generate_buffer
 ```
+
+generate_bufferはデータセットの収集を行う．train_behavioralで訓練した行動方策を読み込んで収集する．ここでは行動方策の訓練はせず，得られたデータをバッファに追加していき，最後に保存するという処理を行う．
+
 Finally train BCQ by running:
 ```
 python main.py
