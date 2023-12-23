@@ -329,6 +329,7 @@ if __name__ == "__main__":
 	if args.train_behavioral or args.generate_buffer:
 		interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
 	elif args.generate_buffer_of_diabetes:
+		replay_buffer = utils.DiabetesBuffer(state_dim, parameters["batch_size"], parameters["buffer_size"], device)
 		extract_from_diabetes_dataset(replay_buffer)
 	else:
 		train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
