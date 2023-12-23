@@ -5,6 +5,7 @@ import json
 import os
 
 import numpy as np
+import pandas as pd
 import torch
 
 import discrete_BCQ
@@ -13,7 +14,32 @@ import utils
 
 
 def extract_from_diabetes_dataset(replay_buffer):
-	pass
+	buffer_name = "buffer_of_diabetes_dataset"
+
+	directory_path = 'dataset/preprocessed_diabetes_SRL_dataset'
+	csv_files = [f for f in os.listdir(directory_path) if f.endswith('.csv')]
+
+	episode_start = True
+	for file_name in csv_files:
+		patient_data = pd.read_csv(directory_path + "/" + file_name)
+		for _, row in patient_data.iterrows():
+			state = row['s1']
+			action = row['a1']
+			reward = row['r1']
+			next_state = row['s2']
+			done = False
+
+			# s2が空欄の場合，データセットを最後まで読み込んだため終了状態とする
+			if pd.isna(next_state):
+				done = True
+				episode_start = True
+
+			done_float = float(done)
+
+			replay_buffer.add(state, action, next_state, reward, done_float, done, episode_start)
+			episode_start = False
+
+	replay_buffer.save(f"./buffers/{buffer_name}")
 
 
 def interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters):
@@ -266,6 +292,8 @@ if __name__ == "__main__":
 		print(f"Setting: Training behavioral, Env: {args.env}, Seed: {args.seed}")
 	elif args.generate_buffer:
 		print(f"Setting: Generating buffer, Env: {args.env}, Seed: {args.seed}")
+	elif args.generate_buffer_of_diabetes:
+		print(f"Setting: Generating buffer of diabates dataset")
 	else:
 		print(f"Setting: Training BCQ, Env: {args.env}, Seed: {args.seed}")
 	print("---------------------------------------")
