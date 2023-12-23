@@ -12,6 +12,10 @@ import DQN
 import utils
 
 
+def extract_from_diabetes_dataset(replay_buffer):
+	pass
+
+
 def interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters):
 	# For saving files
 	setting = f"{args.env}_{args.seed}"
@@ -254,6 +258,7 @@ if __name__ == "__main__":
 	parser.add_argument("--rand_action_p", default=0.2, type=float)# Probability of taking a random action when generating buffer, during non-low noise episode
 	parser.add_argument("--train_behavioral", action="store_true") # If true, train behavioral policy
 	parser.add_argument("--generate_buffer", action="store_true")  # If true, generate buffer
+	parser.add_argument("--generate_buffer_of_diabetes", action="store_true")  # If true, generate buffer of diabetes dataset
 	args = parser.parse_args()
 	
 	print("---------------------------------------")	
@@ -295,5 +300,7 @@ if __name__ == "__main__":
 
 	if args.train_behavioral or args.generate_buffer:
 		interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
+	elif args.generate_buffer_of_diabetes:
+		extract_from_diabetes_dataset(replay_buffer)
 	else:
 		train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
