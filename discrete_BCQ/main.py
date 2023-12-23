@@ -216,9 +216,13 @@ def train_BCQ_of_diabetes(replay_buffer, args):
 	# Load replay buffer	
 	replay_buffer.load(f"./buffers/{buffer_name}")
 
+	# 24 より大きくするとnanになる
+	parameters["eval_freq"] = 24
+
 	for i in range(int(parameters["eval_freq"])):
 		print(i)
 		policy.train(replay_buffer)
+		print(policy.get_q_value(100, 10))
 
 
 # Runs policy for X episodes and returns average reward
@@ -262,8 +266,8 @@ if __name__ == "__main__":
 		"end_eps": 1e-2,
 		"eps_decay_period": 25e4,
 		# Evaluation
-		"eval_freq": 5e4,
-		# "eval_freq": 1,
+		# "eval_freq": 5e4,
+		"eval_freq": 1e2,
 		"eval_eps": 1e-3,
 		# Learning
 		"discount": 0.99,
