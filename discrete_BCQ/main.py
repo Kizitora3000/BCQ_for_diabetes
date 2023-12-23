@@ -201,7 +201,8 @@ if __name__ == "__main__":
 		"end_eps": 1e-2,
 		"eps_decay_period": 25e4,
 		# Evaluation
-		"eval_freq": 5e4,
+		# "eval_freq": 5e4,
+		"eval_freq": 1,
 		"eval_eps": 1e-3,
 		# Learning
 		"discount": 0.99,
@@ -246,7 +247,8 @@ if __name__ == "__main__":
 	parser.add_argument("--env", default="PongNoFrameskip-v0")     # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)             # Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--buffer_name", default="Default")        # Prepends name to filename
-	parser.add_argument("--max_timesteps", default=1e6, type=int)  # Max time steps to run environment or train for
+	# parser.add_argument("--max_timesteps", default=1e6, type=int)  # Max time steps to run environment or train for
+	parser.add_argument("--max_timesteps", default=1, type=int)
 	parser.add_argument("--BCQ_threshold", default=0.3, type=float)# Threshold hyper-parameter for BCQ
 	parser.add_argument("--low_noise_p", default=0.2, type=float)  # Probability of a low noise episode when generating buffer
 	parser.add_argument("--rand_action_p", default=0.2, type=float)# Probability of taking a random action when generating buffer, during non-low noise episode
