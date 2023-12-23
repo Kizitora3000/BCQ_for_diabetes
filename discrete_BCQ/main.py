@@ -7,14 +7,15 @@ import os
 import numpy as np
 import pandas as pd
 import torch
+import json
 
 import discrete_BCQ
 import DQN
 import utils
 
 
-def extract_from_diabetes_dataset(replay_buffer):
-	buffer_name = "buffer_of_diabetes_dataset"
+def extract_from_diabetes_dataset(replay_buffer, args):
+	buffer_name = f"{args.buffer_name}"
 
 	directory_path = 'dataset/preprocessed_diabetes_SRL_dataset'
 	csv_files = [f for f in os.listdir(directory_path) if f.endswith('.csv')]
@@ -190,6 +191,52 @@ def train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args
 		print(f"Training iterations: {training_iters}")
 
 
+def train_BCQ_of_diabetes(replay_buffer, args):
+	num_actions=64
+	buffer_name = f"{args.buffer_name}"
+
+	# Initialize and load policy
+	policy = discrete_BCQ.discrete_BCQ(
+		is_atari,
+		num_actions,
+		state_dim,
+		device,
+		args.BCQ_threshold,
+		parameters["discount"],
+		parameters["optimizer"],
+		parameters["optimizer_parameters"],
+		parameters["polyak_target_update"],
+		parameters["target_update_freq"],
+		parameters["tau"],
+		parameters["initial_eps"],
+		parameters["end_eps"],
+		parameters["eps_decay_period"],
+		parameters["eval_eps"]
+	)
+
+	# Load replay buffer	
+	replay_buffer.load(f"./buffers/{buffer_name}")
+
+	# 24 より大きくするとnanになる
+	parameters["eval_freq"] = 24
+
+	for _ in range(int(parameters["eval_freq"])):
+		policy.train(replay_buffer)
+	
+	state_num = 503
+	action_num = 63
+	Q_table = np.zeros((state_num, action_num))
+	for state in range(state_num):
+		for action in range(action_num):
+			Q_table[state][action] = policy.get_q_value(state, action)
+
+	list_Q_table = Q_table.tolist()
+	json_Q_table = json.dumps(list_Q_table)
+
+	with open("./bcq_data.json", 'w') as file:
+		file.write(json_Q_table)
+
+
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
 def eval_policy(policy, env_name, seed, eval_episodes=10):
@@ -232,7 +279,7 @@ if __name__ == "__main__":
 		"eps_decay_period": 25e4,
 		# Evaluation
 		# "eval_freq": 5e4,
-		"eval_freq": 1,
+		"eval_freq": 1e2,
 		"eval_eps": 1e-3,
 		# Learning
 		"discount": 0.99,
@@ -285,6 +332,7 @@ if __name__ == "__main__":
 	parser.add_argument("--train_behavioral", action="store_true") # If true, train behavioral policy
 	parser.add_argument("--generate_buffer", action="store_true")  # If true, generate buffer
 	parser.add_argument("--generate_buffer_of_diabetes", action="store_true")  # If true, generate buffer of diabetes dataset
+	parser.add_argument("--train_BCQ_of_diabetes", action="store_true")  # If true, train BCQ of diabetes dataset
 	args = parser.parse_args()
 	
 	print("---------------------------------------")	
@@ -326,9 +374,18 @@ if __name__ == "__main__":
 	# Initialize buffer
 	replay_buffer = utils.ReplayBuffer(state_dim, is_atari, atari_preprocessing, parameters["batch_size"], parameters["buffer_size"], device)
 
+	if args.generate_buffer_of_diabetes or args.train_BCQ_of_diabetes:
+		is_atari = False
+		args.buffer_name = "buffer_of_diabetes_dataset"
+		state_dim = 1
+		replay_buffer = utils.DiabetesBuffer(state_dim, parameters["batch_size"], parameters["buffer_size"], device)
+		
+
 	if args.train_behavioral or args.generate_buffer:
 		interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
 	elif args.generate_buffer_of_diabetes:
-		extract_from_diabetes_dataset(replay_buffer)
+		extract_from_diabetes_dataset(replay_buffer, args)
+	elif args.train_BCQ_of_diabetes:
+		train_BCQ_of_diabetes(replay_buffer, args)
 	else:
 		train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
