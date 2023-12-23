@@ -289,7 +289,7 @@ if __name__ == "__main__":
 	parser.add_argument("--train_behavioral", action="store_true") # If true, train behavioral policy
 	parser.add_argument("--generate_buffer", action="store_true")  # If true, generate buffer
 	parser.add_argument("--generate_buffer_of_diabetes", action="store_true")  # If true, generate buffer of diabetes dataset
-	parser.add_argument("--train_BCQ_of_diabetes")  # If true, train BCQ of diabetes dataset
+	parser.add_argument("--train_BCQ_of_diabetes", action="store_true")  # If true, train BCQ of diabetes dataset
 	args = parser.parse_args()
 	
 	print("---------------------------------------")	
