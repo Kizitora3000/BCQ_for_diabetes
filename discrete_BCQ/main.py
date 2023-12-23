@@ -331,12 +331,15 @@ if __name__ == "__main__":
 	# Initialize buffer
 	replay_buffer = utils.ReplayBuffer(state_dim, is_atari, atari_preprocessing, parameters["batch_size"], parameters["buffer_size"], device)
 
-	if args.train_behavioral or args.generate_buffer:
-		interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
-	elif args.generate_buffer_of_diabetes:
+	if args.generate_buffer_of_diabetes or args.train_BCQ_of_diabetes:
 		args.buffer_name = "buffer_of_diabetes_dataset"
 		state_dim = 1
 		replay_buffer = utils.DiabetesBuffer(state_dim, parameters["batch_size"], parameters["buffer_size"], device)
+		
+
+	if args.train_behavioral or args.generate_buffer:
+		interact_with_environment(env, replay_buffer, is_atari, num_actions, state_dim, device, args, parameters)
+	elif args.generate_buffer_of_diabetes:
 		extract_from_diabetes_dataset(replay_buffer, args)
 	elif args.train_BCQ_of_diabetes:
 		train_BCQ_of_diabetes(replay_buffer, args)
