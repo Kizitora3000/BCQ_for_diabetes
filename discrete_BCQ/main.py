@@ -34,6 +34,7 @@ def extract_from_diabetes_dataset(replay_buffer, args):
 			if pd.isna(next_state):
 				done = True
 				episode_start = True
+				continue
 
 			done_float = float(done)
 
@@ -217,11 +218,29 @@ def train_BCQ_of_diabetes(replay_buffer, args):
 	# Load replay buffer	
 	replay_buffer.load(f"./buffers/{buffer_name}")
 
-	# 24 より大きくするとnanになる
-	parameters["eval_freq"] = 24
+	training_iters = 0
+	loss_history = []
+	
+	while training_iters < args.max_timesteps: 
+		lh = []
+		for i in range(int(parameters["eval_freq"])):
+			loss  = policy.train(replay_buffer)
+			lh.append(loss.item())
+		loss_history.append(np.mean(lh))
 
-	for _ in range(int(parameters["eval_freq"])):
-		policy.train(replay_buffer)
+		training_iters += int(parameters["eval_freq"])
+		#print(training_iters / int(parameters["eval_freq"]))
+		#print(policy.get_q_value(100, 0))
+
+	import matplotlib.pyplot as plt
+	plt.figure(figsize=(10, 5))
+	plt.plot(loss_history, label='Training Loss')
+	plt.xlabel('Training Iterations')
+	plt.ylabel('Loss')
+	plt.title('BCQ Training Loss Over Time')
+	plt.legend()
+	plt.grid(True)
+	plt.show()
 	
 	state_num = 503
 	action_num = 63
@@ -325,7 +344,7 @@ if __name__ == "__main__":
 	parser.add_argument("--seed", default=0, type=int)             # Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--buffer_name", default="Default")        # Prepends name to filename
 	# parser.add_argument("--max_timesteps", default=1e6, type=int)  # Max time steps to run environment or train for
-	parser.add_argument("--max_timesteps", default=1, type=int)
+	parser.add_argument("--max_timesteps", default=5e4, type=int) # 5e4
 	parser.add_argument("--BCQ_threshold", default=0.3, type=float)# Threshold hyper-parameter for BCQ
 	parser.add_argument("--low_noise_p", default=0.2, type=float)  # Probability of a low noise episode when generating buffer
 	parser.add_argument("--rand_action_p", default=0.2, type=float)# Probability of taking a random action when generating buffer, during non-low noise episode

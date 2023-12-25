@@ -157,6 +157,8 @@ class discrete_BCQ(object):
 		self.iterations += 1
 		self.maybe_update_target()
 
+		return Q_loss
+
 
 	def polyak_target_update(self):
 		for param, target_param in zip(self.Q.parameters(), self.Q_target.parameters()):
