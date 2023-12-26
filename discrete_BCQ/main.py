@@ -193,7 +193,7 @@ def train_BCQ(env, replay_buffer, is_atari, num_actions, state_dim, device, args
 
 
 def train_BCQ_of_diabetes(replay_buffer, args):
-	num_actions=64
+	num_actions=63
 	buffer_name = f"{args.buffer_name}"
 
 	# Initialize and load policy
@@ -221,7 +221,7 @@ def train_BCQ_of_diabetes(replay_buffer, args):
 	training_iters = 0
 	loss_history = []
 	
-	while training_iters < args.max_timesteps: 
+	while training_iters < args.max_timesteps:
 		lh = []
 		for _ in range(int(parameters["eval_freq"])):
 			loss  = policy.train(replay_buffer)
@@ -245,7 +245,7 @@ def train_BCQ_of_diabetes(replay_buffer, args):
 
 			with open(json_name, 'w') as file:
 				file.write(json_Q_table)
-
+	policy.save_model()
 	"""
 	import matplotlib.pyplot as plt
 	plt.figure(figsize=(10, 5))
@@ -346,8 +346,8 @@ if __name__ == "__main__":
 	parser.add_argument("--env", default="PongNoFrameskip-v0")     # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)             # Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--buffer_name", default="Default")        # Prepends name to filename
-	parser.add_argument("--max_timesteps", default=1e6, type=int)  # Max time steps to run environment or train for
-	# parser.add_argument("--max_timesteps", default=5e4, type=int) # 5e4
+	# parser.add_argument("--max_timesteps", default=1e6, type=int)  # Max time steps to run environment or train for
+	parser.add_argument("--max_timesteps", default=1e4, type=int) # 5e4
 	parser.add_argument("--BCQ_threshold", default=0.3, type=float)# Threshold hyper-parameter for BCQ
 	parser.add_argument("--low_noise_p", default=0.2, type=float)  # Probability of a low noise episode when generating buffer
 	parser.add_argument("--rand_action_p", default=0.2, type=float)# Probability of taking a random action when generating buffer, during non-low noise episode

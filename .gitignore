@@ -1,2 +1,4 @@
 discrete_BCQ/dataset/*
 discrete_BCQ/__pycache__
+discrete_BCQ/BCQ_weights
+discrete_BCQ/*.json

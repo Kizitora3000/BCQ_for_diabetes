@@ -177,3 +177,6 @@ class discrete_BCQ(object):
 		current_Q = current_Q.gather(1, action)
 
 		return current_Q
+	
+	def save_model(self):
+		torch.save(self.Q.state_dict(), "BCQ_weights")
