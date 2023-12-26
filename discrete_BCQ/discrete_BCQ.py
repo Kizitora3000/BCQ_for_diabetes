@@ -62,7 +62,7 @@ class discrete_BCQ(object):
 		num_actions,
 		state_dim,
 		device,
-		BCQ_threshold=0.3,
+		BCQ_threshold=0.9, # 0.3
 		discount=0.99,
 		optimizer="Adam",
 		optimizer_parameters={},
